@@ -60,7 +60,8 @@ def train(args):
     print(f"Loading dataset: {args.dataset}")
     X_train, X_val, X_test, y_train, y_val, y_test = load_dataset(args.dataset)
 
-    if len(args.hidden_size) == 1:
+    if isinstance(args.hidden_size, (list, tuple)):
+      if len(args.hidden_size) == 1:
         args.hidden_size = args.hidden_size[0]
 
     model = NeuralNetwork(args)
