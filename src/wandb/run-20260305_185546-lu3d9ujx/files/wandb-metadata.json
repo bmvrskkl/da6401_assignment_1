@@ -1,0 +1,28 @@
+{
+  "os":  "Windows-10-10.0.26200-SP0",
+  "python":  "CPython 3.11.9",
+  "startedAt":  "2026-03-05T13:25:46.344736Z",
+  "program":  "C:\\Users\\vignesh ramanan\\da6401_assignment_1\\src\\sweep.py",
+  "codePath":  "src\\sweep.py",
+  "codePathLocal":  "sweep.py",
+  "git":  {
+    "remote":  "https://bmvrskkl:@github.com/bmvrskkl/da6401_assignment_1.git",
+    "commit":  "188c931a3368569d8caf155681d1e9484a1f766b"
+  },
+  "email":  "bskkl04@gmail.com",
+  "root":  "C:\\Users\\vignesh ramanan\\da6401_assignment_1\\src",
+  "host":  "DESKTOP-LNFEN4A",
+  "executable":  "C:\\Users\\vignesh ramanan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "250486976512",
+      "used":  "222334423040"
+    }
+  },
+  "memory":  {
+    "total":  "8423825408"
+  },
+  "writerId":  "0fj7mamvl98uv50av3scuob88wu37jv5"
+}

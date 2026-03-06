@@ -1,0 +1,102 @@
+_wandb:
+    value:
+        cli_version: 0.25.0
+        e:
+            j316v4q7g5j9ox7pgeas8dx068gfo5l2:
+                args:
+                    - -d
+                    - fashion_mnist
+                    - -e
+                    - "20"
+                    - -b
+                    - "32"
+                    - -o
+                    - rmsprop
+                    - -lr
+                    - "0.0001"
+                    - -nhl
+                    - "3"
+                    - -sz
+                    - "128"
+                    - -a
+                    - tanh
+                    - -w_i
+                    - xavier
+                    - -w_p
+                    - da6401_assignment1
+                codePath: src\train.py
+                codePathLocal: train.py
+                cpu_count: 4
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "250486976512"
+                        used: "222205153280"
+                email: bskkl04@gmail.com
+                executable: C:\Users\vignesh ramanan\AppData\Local\Programs\Python\Python311\python.exe
+                git:
+                    commit: 3c82177874b050805fb314956bf7b9f41bdc6127
+                    remote: https://bmvrskkl:@github.com/bmvrskkl/da6401_assignment_1.git
+                host: DESKTOP-LNFEN4A
+                memory:
+                    total: "8423825408"
+                os: Windows-10-10.0.26200-SP0
+                program: C:\Users\vignesh ramanan\da6401_assignment_1\src\train.py
+                python: CPython 3.11.9
+                root: C:\Users\vignesh ramanan\da6401_assignment_1\src
+                startedAt: "2026-03-05T22:28:53.985664Z"
+                writerId: j316v4q7g5j9ox7pgeas8dx068gfo5l2
+        m: []
+        python_version: 3.11.9
+        t:
+            "1":
+                - 2
+                - 3
+                - 5
+                - 53
+            "2":
+                - 2
+                - 3
+                - 5
+                - 53
+            "3":
+                - 2
+                - 16
+            "4": 3.11.9
+            "5": 0.25.0
+            "8":
+                - 3
+            "12": 0.25.0
+            "13": windows-amd64
+activation:
+    value: tanh
+batch_size:
+    value: 32
+dataset:
+    value: fashion_mnist
+epochs:
+    value: 20
+hidden_size:
+    value: 128
+learning_rate:
+    value: 0.0001
+loss:
+    value: cross_entropy
+model_path:
+    value: best_model.npy
+no_wandb:
+    value: false
+num_layers:
+    value: 3
+optimizer:
+    value: rmsprop
+seed:
+    value: 42
+wandb_entity:
+    value: null
+wandb_project:
+    value: da6401_assignment1
+weight_decay:
+    value: 0.0005
+weight_init:
+    value: xavier

@@ -1,0 +1,1 @@
+{"grad_norm/layer_0":NaN,"_step":9,"_runtime":60,"train/f1":0.01797036962127724,"_wandb":{"runtime":60},"val/accuracy":0.09866666666666667,"epoch":10,"val/loss":NaN,"train/loss":NaN,"val/f1":0.01796116504854369,"_timestamp":1.772743536140616e+09,"train/accuracy":0.09872222222222223}

@@ -30,7 +30,7 @@ def sweep_run():
     cfg = wandb.config
 
     args = types.SimpleNamespace(
-        dataset="fashion_mnist",
+        dataset="mnist",
         epochs=cfg.epochs,
         batch_size=cfg.batch_size,
         loss=cfg.loss,

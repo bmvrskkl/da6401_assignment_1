@@ -1,0 +1,70 @@
+_wandb:
+    value:
+        cli_version: 0.25.0
+        e:
+            lcvn0yf2ip2vilj6y6dpa8oiyzajobcl:
+                codePath: src\sweep.py
+                codePathLocal: sweep.py
+                cpu_count: 4
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "250486976512"
+                        used: "222329188352"
+                email: bskkl04@gmail.com
+                executable: C:\Users\vignesh ramanan\AppData\Local\Programs\Python\Python311\python.exe
+                git:
+                    commit: 188c931a3368569d8caf155681d1e9484a1f766b
+                    remote: https://bmvrskkl:@github.com/bmvrskkl/da6401_assignment_1.git
+                host: DESKTOP-LNFEN4A
+                memory:
+                    total: "8423825408"
+                os: Windows-10-10.0.26200-SP0
+                program: C:\Users\vignesh ramanan\da6401_assignment_1\src\sweep.py
+                python: CPython 3.11.9
+                root: C:\Users\vignesh ramanan\da6401_assignment_1\src
+                startedAt: "2026-03-05T12:51:22.009854Z"
+                writerId: lcvn0yf2ip2vilj6y6dpa8oiyzajobcl
+        m: []
+        python_version: 3.11.9
+        t:
+            "1":
+                - 2
+                - 3
+                - 5
+                - 53
+            "2":
+                - 2
+                - 3
+                - 5
+                - 53
+            "3":
+                - 2
+                - 14
+                - 24
+            "4": 3.11.9
+            "5": 0.25.0
+            "8":
+                - 3
+            "12": 0.25.0
+            "13": windows-amd64
+activation:
+    value: tanh
+batch_size:
+    value: 32
+epochs:
+    value: 10
+hidden_size:
+    value: 64
+learning_rate:
+    value: 0.001
+loss:
+    value: mse
+num_layers:
+    value: 2
+optimizer:
+    value: rmsprop
+weight_decay:
+    value: 0
+weight_init:
+    value: xavier

@@ -1,19 +1,19 @@
 {
   "dataset": "fashion_mnist",
   "epochs": 20,
-  "batch_size": 64,
+  "batch_size": 32,
   "loss": "cross_entropy",
   "optimizer": "rmsprop",
-  "learning_rate": 0.001,
+  "learning_rate": 0.0001,
   "weight_decay": 0.0005,
   "num_layers": 3,
   "hidden_size": 128,
-  "activation": "relu",
+  "activation": "tanh",
   "weight_init": "xavier",
   "wandb_project": "da6401_assignment1",
   "wandb_entity": null,
   "no_wandb": false,
   "seed": 42,
   "model_path": "best_model.npy",
-  "best_test_f1": 0.878940083093452
+  "best_test_f1": 0.8776084387102021
 }
