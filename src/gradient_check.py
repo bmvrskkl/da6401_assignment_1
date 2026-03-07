@@ -5,7 +5,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
 
 from ann.neural_network import NeuralNetwork
-from ann.losses import get_loss
+from ann.objective_functions import get_loss
 
 def numerical_gradient(model, X, y, epsilon=1e-5):
     loss_fn = get_loss(model.args.loss)

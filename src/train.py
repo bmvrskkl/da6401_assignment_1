@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from ann.neural_network import NeuralNetwork
 from ann.optimizers import get_optimizer
-from data_utils import load_dataset, get_batches
+from utils.data_loader import load_dataset, get_batches
 
 try:
     import wandb

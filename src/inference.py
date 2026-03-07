@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 sys.path.insert(0, os.path.dirname(__file__))
 
 from ann.neural_network import NeuralNetwork
-from data_utils import load_dataset, get_batches
+from utils.data_loader import load_dataset, get_batches
 
 def parse_args():
     p = argparse.ArgumentParser()

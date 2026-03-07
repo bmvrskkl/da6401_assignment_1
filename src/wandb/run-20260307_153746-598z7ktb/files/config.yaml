@@ -1,0 +1,45 @@
+_wandb:
+    value:
+        cli_version: 0.25.0
+        e:
+            oueu20gom1v5i3g60yyy498bdt2sb4fg:
+                cpu_count: 4
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "250486976512"
+                        used: "221662105600"
+                email: bskkl04@gmail.com
+                executable: C:\Users\vignesh ramanan\AppData\Local\Programs\Python\Python311\python.exe
+                git:
+                    commit: 1c7e1cfd764ec322194437ff5062282cab08b4c7
+                    remote: https://bmvrskkl:@github.com/bmvrskkl/da6401_assignment_1.git
+                host: DESKTOP-LNFEN4A
+                memory:
+                    total: "8423825408"
+                os: Windows-10-10.0.26200-SP0
+                program: <python with no main file>
+                python: CPython 3.11.9
+                root: C:\Users\vignesh ramanan\da6401_assignment_1\src
+                startedAt: "2026-03-07T10:07:46.033280Z"
+                writerId: oueu20gom1v5i3g60yyy498bdt2sb4fg
+        m: []
+        python_version: 3.11.9
+        t:
+            "1":
+                - 5
+                - 53
+            "2":
+                - 2
+                - 3
+                - 5
+                - 53
+            "3":
+                - 2
+                - 13
+            "4": 3.11.9
+            "5": 0.25.0
+            "8":
+                - 3
+            "12": 0.25.0
+            "13": windows-amd64

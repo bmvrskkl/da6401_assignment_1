@@ -1,6 +1,6 @@
 import numpy as np
-from ann.layer import DenseLayer
-from ann.losses import get_loss
+from ann.neural_layer import DenseLayer
+from ann.objective_functions import get_loss
 from ann.activations import softmax
 
 class NeuralNetwork:
