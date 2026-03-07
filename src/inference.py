@@ -12,18 +12,18 @@ from utils.data_loader import load_dataset, get_batches
 def parse_arguments():
     p = argparse.ArgumentParser()
     p.add_argument("-d",   "--dataset",       type=str,   default="mnist", choices=["mnist", "fashion_mnist"])
-    p.add_argument("-e",   "--epochs",         type=int,   default=20)
-    p.add_argument("-b",   "--batch_size",     type=int,   default=64)
-    p.add_argument("-l",   "--loss",           type=str,   default="cross_entropy", choices=["cross_entropy", "mse"])
-    p.add_argument("-o",   "--optimizer",      type=str,   default="rmsprop", choices=["sgd", "momentum", "nag", "rmsprop"])
-    p.add_argument("-lr",  "--learning_rate",  type=float, default=0.001)
-    p.add_argument("-wd",  "--weight_decay",   type=float, default=0.0005)
-    p.add_argument("-nhl", "--num_layers",     type=int,   default=3)
-    p.add_argument("-sz",  "--hidden_size",    type=int,   nargs="+", default=[128])
-    p.add_argument("-a",   "--activation",     type=str,   default="relu", choices=["sigmoid", "tanh", "relu"])
-    p.add_argument("-w_i", "--weight_init",    type=str,   default="xavier", choices=["random", "xavier","zeros"])
-    p.add_argument("-w_p", "--wandb_project",  type=str,   default="da6401_assignment1")
-    p.add_argument("--model_path",             type=str,   default="best_model.npy")
+    p.add_argument("-e",   "--epochs",        type=int,   default=10)
+    p.add_argument("-b",   "--batch_size",    type=int,   default=64)
+    p.add_argument("-l",   "--loss",          type=str,   default="cross_entropy", choices=["cross_entropy", "mse"])
+    p.add_argument("-o",   "--optimizer",     type=str,   default="rmsprop", choices=["sgd", "momentum", "nag", "rmsprop"])
+    p.add_argument("-lr",  "--learning_rate", type=float, default=0.001)
+    p.add_argument("-wd",  "--weight_decay",  type=float, default=0.0)
+    p.add_argument("-nhl", "--num_layers",    type=int,   default=3)
+    p.add_argument("-sz",  "--hidden_size",   type=int,   nargs="+", default=[128, 128, 128])
+    p.add_argument("-a",   "--activation",    type=str,   default="relu", choices=["sigmoid", "tanh", "relu"])
+    p.add_argument("-w_i", "--weight_init",   type=str,   default="xavier", choices=["random", "xavier", "zeros"])
+    p.add_argument("-w_p", "--wandb_project", type=str,   default="da6401_assignment1")
+    p.add_argument("--model_path",            type=str,   default="best_model.npy")
     return p.parse_args()
 
 def load_model(model_path):
@@ -32,9 +32,6 @@ def load_model(model_path):
 
 def main():
     args = parse_arguments()
-
-    if len(args.hidden_size) == 1:
-        args.hidden_size = args.hidden_size[0]
 
     print(f"Loading dataset: {args.dataset}")
     _, _, X_test, _, _, y_test = load_dataset(args.dataset)
