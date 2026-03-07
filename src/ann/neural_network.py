@@ -58,11 +58,17 @@ class NeuralNetwork:
     def get_weights(self):
         weights = {}
         for i, layer in enumerate(self.layers):
-            weights[f"layer_{i}_W"] = layer.W
-            weights[f"layer_{i}_b"] = layer.b
+            weights[f'W{i}'] = layer.W.copy()
+            weights[f'b{i}'] = layer.b.copy()
         return weights
 
     def set_weights(self, weights):
-        for i, layer in enumerate(self.layers):
-            layer.W = weights[f"layer_{i}_W"]
-            layer.b = weights[f"layer_{i}_b"]
+        if isinstance(weights, np.ndarray) and weights.ndim == 0:
+            weights = weights.item()
+        if isinstance(weights, dict):
+            for i, layer in enumerate(self.layers):
+                if f'W{i}' in weights:
+                    layer.W = np.array(weights[f'W{i}']).copy()
+                if f'b{i}' in weights:
+                    layer.b = np.array(weights[f'b{i}']).copy()
+            return
