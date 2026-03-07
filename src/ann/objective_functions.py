@@ -2,6 +2,9 @@ import numpy as np
 from ann.activations import softmax
 
 def cross_entropy_loss(logits, y_true):
+    y_true = np.array(y_true).flatten().astype(int)
+    if logits.ndim == 1:
+        logits = logits.reshape(1, -1)
     batch_size = logits.shape[0]
     probs = softmax(logits)
     probs_clipped = np.clip(probs, 1e-12, 1.0)
@@ -11,6 +14,9 @@ def cross_entropy_loss(logits, y_true):
     return loss, dlogits
 
 def mse_loss(logits, y_true):
+    y_true = np.array(y_true).flatten().astype(int)
+    if logits.ndim == 1:
+        logits = logits.reshape(1, -1)
     batch_size = logits.shape[0]
     num_classes = logits.shape[1]
     y_onehot = np.zeros((batch_size, num_classes))
