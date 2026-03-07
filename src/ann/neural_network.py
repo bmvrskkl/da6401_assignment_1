@@ -4,63 +4,37 @@ from ann.objective_functions import get_loss
 from ann.activations import softmax
 
 class NeuralNetwork:
-    def __init__(self,
-                 input_size=784,
-                 hidden_sizes=None,
-                 output_size=10,
-                 activation='relu',
-                 weight_init='xavier',
-                 loss='cross_entropy',
-                 num_layers=None,
-                 hidden_size=None):
+    INPUT_SIZE = 784
+    OUTPUT_SIZE = 10
 
-        import argparse
-        if isinstance(input_size, argparse.Namespace):
-            ns = input_size
-            input_size   = getattr(ns, 'input_size', 784)
-            hidden_sizes = getattr(ns, 'hidden_sizes', getattr(ns, 'hidden_size', None))
-            output_size  = getattr(ns, 'output_size', 10)
-            activation   = getattr(ns, 'activation', 'relu')
-            weight_init  = getattr(ns, 'weight_init', 'xavier')
-            loss         = getattr(ns, 'loss', 'cross_entropy')
-            num_layers   = getattr(ns, 'num_layers', None)
+    def __init__(self, args):
+        self.args = args
+        self.weight_decay = getattr(args, "weight_decay", 0.0)
+        self.loss_fn = get_loss(args.loss)
 
-        if hidden_sizes is None:
-            hs = hidden_size
-            nl = num_layers
-            if hs is not None and nl is not None:
-                hidden_sizes = [int(hs)] * int(nl) if isinstance(hs, (int, np.integer)) \
-                               else [int(h) for h in hs]
-            elif hs is not None:
-                hidden_sizes = [int(h) for h in hs] if hasattr(hs, '__iter__') \
-                               else [int(hs)]
-            elif nl is not None:
-                hidden_sizes = [128] * int(nl)
-            else:
-                hidden_sizes = [128]
+        # Resolve hidden sizes
+        hs = args.hidden_size
+        nl = args.num_layers
 
-        if isinstance(hidden_sizes, (int, np.integer)):
-            hidden_sizes = [int(hidden_sizes)]
-        hidden_sizes = [int(h) for h in hidden_sizes]
+        if isinstance(hs, (list, tuple)):
+            hidden_sizes = [int(h) for h in hs]
+            if len(hidden_sizes) == 1:
+                hidden_sizes = hidden_sizes * nl
+        else:
+            hidden_sizes = [int(hs)] * nl
 
-        self.input_size   = int(input_size)
-        self.output_size  = int(output_size)
-        self.hidden_sizes = hidden_sizes
-        self.activation   = str(activation)
-        self.weight_init  = str(weight_init)
-        self.loss_name    = str(loss)
-        self.loss_fn      = get_loss(str(loss))
-        self.weight_decay = 0.0
-
-        sizes = [self.input_size] + hidden_sizes + [self.output_size]
         self.layers = []
-        for i in range(len(sizes) - 1):
-            is_output = (i == len(sizes) - 2)
-            act = "linear" if is_output else activation
+        in_size = self.INPUT_SIZE
+
+        for h in hidden_sizes:
             self.layers.append(
-                DenseLayer(sizes[i], sizes[i+1],
-                           activation=act, weight_init=weight_init)
+                DenseLayer(in_size, h, activation=args.activation, weight_init=args.weight_init)
             )
+            in_size = h
+
+        self.layers.append(
+            DenseLayer(in_size, self.OUTPUT_SIZE, activation="linear", weight_init=args.weight_init)
+        )
 
     def forward(self, X):
         A = X
@@ -77,10 +51,11 @@ class NeuralNetwork:
         for layer in reversed(self.layers):
             dA = layer.backward(dA, weight_decay=self.weight_decay)
         gradients = [{"grad_W": l.grad_W, "grad_b": l.grad_b} for l in self.layers]
-        return gradients
+        return loss, gradients
 
     def predict(self, X):
-        return np.argmax(self.forward(X), axis=1)
+        logits = self.forward(X)
+        return np.argmax(logits, axis=1)
 
     def predict_proba(self, X):
         return softmax(self.forward(X))
