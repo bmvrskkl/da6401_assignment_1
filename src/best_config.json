@@ -1,19 +1,15 @@
 {
   "dataset": "mnist",
-  "epochs": 10,
-  "batch_size": 64,
+  "hidden_size": 128,
+  "num_layers": 3,
+  "activation": "relu",
+  "weight_init": "xavier",
   "loss": "cross_entropy",
   "optimizer": "rmsprop",
   "learning_rate": 0.001,
-  "weight_decay": 0.0005,
-  "num_layers": 3,
-  "hidden_size": 128,
-  "activation": "relu",
-  "weight_init": "xavier",
-  "wandb_project": "da6401_assignment1",
-  "wandb_entity": null,
-  "no_wandb": false,
-  "seed": 42,
-  "model_path": "best_model.npy",
-  "best_test_f1": 0.9796733414443111
+  "weight_decay": 0.0,
+  "batch_size": 64,
+  "epochs": 10,
+  "best_val_f1": 0.9749938431192327,
+  "test_f1": 0.9762944426278632
 }

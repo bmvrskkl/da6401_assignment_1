@@ -16,7 +16,7 @@ class DenseLayer:
         else:
             self.W = np.random.randn(input_size, output_size) * 0.01
 
-        self.b = np.zeros(output_size)
+        self.b = np.zeros((1, output_size))
 
         # Gradients
         self.grad_W = np.zeros_like(self.W)
@@ -49,6 +49,6 @@ class DenseLayer:
         batch_size = self._input.shape[0]
         dZ = dA * self._act_d(self._Z)
         self.grad_W = (self._input.T @ dZ) / batch_size + weight_decay * self.W
-        self.grad_b = np.sum(dZ, axis=0) / batch_size
+        self.grad_b = np.sum(dZ, axis=0, keepdims=True) / batch_size
         dA_prev = dZ @ self.W.T
         return dA_prev
