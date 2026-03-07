@@ -21,7 +21,7 @@ def parse_args():
     p.add_argument("-nhl", "--num_layers",     type=int,   default=3)
     p.add_argument("-sz",  "--hidden_size",    type=int,   nargs="+", default=[128])
     p.add_argument("-a",   "--activation",     type=str,   default="relu", choices=["sigmoid", "tanh", "relu"])
-    p.add_argument("-w_i", "--weight_init",    type=str,   default="xavier", choices=["random", "xavier"])
+    p.add_argument("-w_i", "--weight_init",    type=str,   default="xavier", choices=["random", "xavier","zeros"])
     p.add_argument("-w_p", "--wandb_project",  type=str,   default="da6401_assignment1")
     p.add_argument("--model_path",             type=str,   default="best_model.npy")
     return p.parse_args()

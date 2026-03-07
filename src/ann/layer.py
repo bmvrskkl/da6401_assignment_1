@@ -9,10 +9,12 @@ class DenseLayer:
 
         # Weight initialisation
         if weight_init == "xavier":
-            limit = np.sqrt(6.0 / (input_size + output_size))
-            self.W = np.random.uniform(-limit, limit, (input_size, output_size))
+              limit = np.sqrt(6.0 / (input_size + output_size))
+              self.W = np.random.uniform(-limit, limit, (input_size, output_size))
+        elif weight_init == "zeros":
+              self.W = np.zeros((input_size, output_size))
         else:
-            self.W = np.random.randn(input_size, output_size) * 0.01
+              self.W = np.random.randn(input_size, output_size) * 0.01
 
         self.b = np.zeros((1, output_size))
 

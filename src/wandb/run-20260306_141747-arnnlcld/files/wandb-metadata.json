@@ -1,0 +1,50 @@
+{
+  "os":  "Windows-10-10.0.26200-SP0",
+  "python":  "CPython 3.11.9",
+  "startedAt":  "2026-03-06T08:47:47.771392Z",
+  "args":  [
+    "-d",
+    "mnist",
+    "-e",
+    "10",
+    "-b",
+    "64",
+    "-o",
+    "momentum",
+    "-lr",
+    "0.01",
+    "-nhl",
+    "3",
+    "-sz",
+    "128",
+    "-a",
+    "relu",
+    "-w_i",
+    "xavier",
+    "-w_p",
+    "da6401_assignment1"
+  ],
+  "program":  "C:\\Users\\vignesh ramanan\\da6401_assignment_1\\src\\train.py",
+  "codePath":  "src\\train.py",
+  "codePathLocal":  "train.py",
+  "git":  {
+    "remote":  "https://bmvrskkl:@github.com/bmvrskkl/da6401_assignment_1.git",
+    "commit":  "a8e5d0617fe12fc0e5874ee85b2e7610234b5edb"
+  },
+  "email":  "bskkl04@gmail.com",
+  "root":  "C:\\Users\\vignesh ramanan\\da6401_assignment_1\\src",
+  "host":  "DESKTOP-LNFEN4A",
+  "executable":  "C:\\Users\\vignesh ramanan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "250486976512",
+      "used":  "220921516032"
+    }
+  },
+  "memory":  {
+    "total":  "8423825408"
+  },
+  "writerId":  "82q3h1rxhxub014ft1wspczb5hf0cngv"
+}
