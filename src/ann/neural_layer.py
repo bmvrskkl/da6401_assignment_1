@@ -9,14 +9,14 @@ class DenseLayer:
 
         # Weight initialisation
         if weight_init == "xavier":
-              limit = np.sqrt(6.0 / (input_size + output_size))
-              self.W = np.random.uniform(-limit, limit, (input_size, output_size))
+            limit = np.sqrt(6.0 / (input_size + output_size))
+            self.W = np.random.uniform(-limit, limit, (input_size, output_size))
         elif weight_init == "zeros":
-              self.W = np.zeros((input_size, output_size))
+            self.W = np.zeros((input_size, output_size))
         else:
-              self.W = np.random.randn(input_size, output_size) * 0.01
+            self.W = np.random.randn(input_size, output_size) * 0.01
 
-        self.b = np.zeros((1, output_size))
+        self.b = np.zeros(output_size)
 
         # Gradients
         self.grad_W = np.zeros_like(self.W)
@@ -44,9 +44,11 @@ class DenseLayer:
         return self._A
 
     def backward(self, dA, weight_decay=0.0):
+        if dA.ndim == 1:
+            dA = dA.reshape(1, -1)
         batch_size = self._input.shape[0]
         dZ = dA * self._act_d(self._Z)
         self.grad_W = (self._input.T @ dZ) / batch_size + weight_decay * self.W
-        self.grad_b = np.sum(dZ, axis=0, keepdims=True) / batch_size
+        self.grad_b = np.sum(dZ, axis=0) / batch_size
         dA_prev = dZ @ self.W.T
         return dA_prev
