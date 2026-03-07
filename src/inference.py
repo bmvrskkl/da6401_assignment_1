@@ -9,9 +9,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 from ann.neural_network import NeuralNetwork
 from utils.data_loader import load_dataset, get_batches
 
-def parse_args():
+def parse_arguments():
     p = argparse.ArgumentParser()
-    p.add_argument("-d",   "--dataset",       type=str,   default="fashion_mnist", choices=["mnist", "fashion_mnist"])
+    p.add_argument("-d",   "--dataset",       type=str,   default="mnist", choices=["mnist", "fashion_mnist"])
     p.add_argument("-e",   "--epochs",         type=int,   default=20)
     p.add_argument("-b",   "--batch_size",     type=int,   default=64)
     p.add_argument("-l",   "--loss",           type=str,   default="cross_entropy", choices=["cross_entropy", "mse"])
@@ -31,7 +31,7 @@ def load_model(model_path):
     return data
 
 def main():
-    args = parse_args()
+    args = parse_arguments()
 
     if len(args.hidden_size) == 1:
         args.hidden_size = args.hidden_size[0]
