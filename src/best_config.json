@@ -1,5 +1,5 @@
 {
-  "dataset": "fashion_mnist",
+  "dataset": "mnist",
   "epochs": 50,
   "batch_size": 32,
   "loss": "cross_entropy",
