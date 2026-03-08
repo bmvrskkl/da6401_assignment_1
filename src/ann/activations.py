@@ -36,6 +36,8 @@ ACTIVATIONS = {
 }
 
 def get_activation(name):
+    if name is None:
+        return None, None
     if name not in ACTIVATIONS:
         raise ValueError(f"Unknown activation '{name}'. Choose from {list(ACTIVATIONS.keys())}")
     return ACTIVATIONS[name]
