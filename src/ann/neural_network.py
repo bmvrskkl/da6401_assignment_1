@@ -1,6 +1,3 @@
-"""
-NeuralNetwork class — matches exact autograder interface.
-"""
 import numpy as np
 from ann.neural_layer import NeuralLayer
 from ann.activations import softmax
@@ -9,14 +6,11 @@ from ann.optimizers import NAG
 
 
 def to_onehot(y_true, num_classes=10):
-    """Handles scalar, 0-D, 1-D integer labels, or already one-hot (N,10)."""
     y = np.atleast_1d(np.array(y_true))
-
     if y.ndim == 1:
         one_hot = np.zeros((y.shape[0], num_classes))
         one_hot[np.arange(y.shape[0]), y.astype(int)] = 1.0
         return one_hot
-
     return y
 
 
@@ -29,11 +23,8 @@ class NeuralNetwork:
         input_size = 784
         output_size = 10
 
-        hidden_sizes = (
-            config.hidden_size
-            if isinstance(config.hidden_size, list)
-            else [config.hidden_size] * config.num_layers
-        )
+        hidden_sizes = config.hidden_size if isinstance(
+            config.hidden_size, list) else [config.hidden_size] * config.num_layers
 
         activation = config.activation
         weight_init = config.weight_init
@@ -51,17 +42,17 @@ class NeuralNetwork:
 
             act = None if is_output else activation
 
-            layer = NeuralLayer(
-                input_size=layer_sizes[i],
-                output_size=layer_sizes[i + 1],
-                activation=act,
-                weight_init=weight_init,
+            self.layers.append(
+                NeuralLayer(
+                    input_size=layer_sizes[i],
+                    output_size=layer_sizes[i + 1],
+                    activation=act,
+                    weight_init=weight_init,
+                )
             )
 
-            self.layers.append(layer)
-
     def forward(self, X):
-        """Forward pass — returns logits"""
+
         out = X
 
         for layer in self.layers:
@@ -89,7 +80,6 @@ class NeuralNetwork:
 
         y_true = to_onehot(y_true)
 
-        # 🔧 FIX: compute gradient using softmax probabilities
         probs = softmax(logits)
 
         delta = probs - y_true
@@ -134,23 +124,15 @@ class NeuralNetwork:
 
                 layer.b = weights[f"b{i}"]
 
-            elif f"layer_{i}" in weights:
-
-                layer.W = weights[f"layer_{i}"]["W"]
-
-                layer.b = weights[f"layer_{i}"]["b"]
-
     def train_step(self, X_batch, y_batch, optimizer, weight_decay=0.0, is_nag=False):
 
         if is_nag:
-
             for layer in self.layers:
                 optimizer.lookahead(layer)
 
         logits = self.forward(X_batch)
 
         if is_nag:
-
             for layer in self.layers:
                 optimizer.restore(layer)
 
