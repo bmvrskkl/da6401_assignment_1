@@ -6,10 +6,13 @@ from ann.activations import softmax
 
 
 def to_onehot(y, num_classes=10):
-    """Convert integer labels to one-hot if needed."""
-    if y.ndim == 1:
-        one_hot = np.zeros((y.shape[0], num_classes))
-        one_hot[np.arange(y.shape[0]), y.astype(int)] = 1.0
+    """Handles scalar, 0-D, 1-D integer labels, or already one-hot (N,10)."""
+    y = np.atleast_2d(np.atleast_1d(np.array(y, dtype=float)))
+    # If shape is (N,1) or (1,N) and not (N,10), treat as integer labels
+    if y.shape[1] != num_classes:
+        labels = y.flatten().astype(int)
+        one_hot = np.zeros((labels.shape[0], num_classes))
+        one_hot[np.arange(labels.shape[0]), labels] = 1.0
         return one_hot
     return y
 
