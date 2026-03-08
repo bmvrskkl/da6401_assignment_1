@@ -8,6 +8,16 @@ from ann.objective_functions import get_loss
 from ann.optimizers import NAG
 
 
+def to_onehot(y_true, num_classes=10):
+    """Handles scalar, 0-D, 1-D integer labels, or already one-hot (N,10)."""
+    y = np.atleast_1d(np.array(y_true))
+    if y.ndim == 1:
+        one_hot = np.zeros((y.shape[0], num_classes))
+        one_hot[np.arange(y.shape[0]), y.astype(int)] = 1.0
+        return one_hot
+    return y  # already (N, 10)
+
+
 class NeuralNetwork:
     def __init__(self, config):
         self.config = config
@@ -38,7 +48,7 @@ class NeuralNetwork:
             )
 
     def forward(self, X):
-        """Returns logits only — autograder expects just logits, not a tuple."""
+        """Returns logits only."""
         out = X
         for layer in self.layers:
             out = layer.forward(out)
@@ -55,20 +65,14 @@ class NeuralNetwork:
         return np.mean(preds == true_labels)
 
     def backward(self, logits, y_true, weight_decay=0.0):
-        if y_true.ndim == 1:
-            one_hot = np.zeros((y_true.shape[0], 10))
-            one_hot[np.arange(y_true.shape[0]), y_true.astype(int)] = 1.0
-            y_true = one_hot
-        delta = self.loss_grad(logits, y_true)
+        y_true = to_onehot(y_true)
+        delta  = self.loss_grad(logits, y_true)
         for layer in reversed(self.layers):
             delta = layer.backward(delta, weight_decay=weight_decay)
 
     def compute_loss(self, logits, y_true, weight_decay=0.0):
-        if y_true.ndim == 1:
-            one_hot = np.zeros((y_true.shape[0], 10))
-            one_hot[np.arange(y_true.shape[0]), y_true.astype(int)] = 1.0
-            y_true = one_hot
-        loss = self.loss_fn(logits, y_true)
+        y_true = to_onehot(y_true)
+        loss   = self.loss_fn(logits, y_true)
         if weight_decay > 0:
             l2 = sum(np.sum(l.W ** 2) for l in self.layers)
             loss += 0.5 * weight_decay * l2
