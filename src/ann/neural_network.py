@@ -5,7 +5,7 @@ import numpy as np
 from ann.neural_layer import NeuralLayer
 from ann.activations import softmax
 from ann.objective_functions import get_loss
-from ann.optimizers import get_optimizer, NAG
+from ann.optimizers import NAG
 
 
 class NeuralNetwork:
@@ -38,7 +38,11 @@ class NeuralNetwork:
             )
 
     def forward(self, X):
-        """Returns (probs, logits) — autograder expects tuple."""
+        """
+        Returns (probs, logits).
+        probs  = softmax probabilities
+        logits = raw pre-softmax output
+        """
         out = X
         for layer in self.layers:
             out = layer.forward(out)
@@ -47,11 +51,26 @@ class NeuralNetwork:
         return probs, logits
 
     def backward(self, logits, y_true, weight_decay=0.0):
+        """
+        y_true can be either one-hot (N,10) or integer labels (N,).
+        Converts integer labels to one-hot if needed.
+        """
+        # Convert integer labels to one-hot if needed
+        if y_true.ndim == 1:
+            one_hot = np.zeros((y_true.shape[0], 10))
+            one_hot[np.arange(y_true.shape[0]), y_true.astype(int)] = 1.0
+            y_true = one_hot
+
         delta = self.loss_grad(logits, y_true)
         for layer in reversed(self.layers):
             delta = layer.backward(delta, weight_decay=weight_decay)
 
     def compute_loss(self, logits, y_true, weight_decay=0.0):
+        # Convert integer labels to one-hot if needed
+        if y_true.ndim == 1:
+            one_hot = np.zeros((y_true.shape[0], 10))
+            one_hot[np.arange(y_true.shape[0]), y_true.astype(int)] = 1.0
+            y_true = one_hot
         loss = self.loss_fn(logits, y_true)
         if weight_decay > 0:
             l2 = sum(np.sum(l.W ** 2) for l in self.layers)
@@ -68,7 +87,6 @@ class NeuralNetwork:
         return np.mean(preds == true_labels)
 
     def get_weights(self):
-        """Returns weights as W0, b0, W1, b1 format for autograder."""
         weights = {}
         for i, layer in enumerate(self.layers):
             weights[f"W{i}"] = layer.W.copy()
@@ -76,7 +94,6 @@ class NeuralNetwork:
         return weights
 
     def set_weights(self, weights):
-        """Supports both W0/b0 and layer_0 formats."""
         for i, layer in enumerate(self.layers):
             if f"W{i}" in weights:
                 layer.W = weights[f"W{i}"]
