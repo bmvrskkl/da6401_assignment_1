@@ -1,6 +1,5 @@
 """
 Inference Script — Load saved model and evaluate on test set.
-Run: python3 src/inference.py --model src/best_model.npy --config src/best_config.json
 """
 import sys
 import os
@@ -15,7 +14,7 @@ from ann.neural_network import NeuralNetwork
 from utils.data_loader import load_dataset
 
 
-def parse_args():
+def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model",   type=str, default="src/best_model.npy")
     parser.add_argument("--config",  type=str, default="src/best_config.json")
@@ -50,7 +49,7 @@ def evaluate_model(model, X_test, y_test_raw):
 
 
 def main():
-    args = parse_args()
+    args = parse_arguments()
 
     with open(args.config, "r") as f:
         cfg_dict = json.load(f)
