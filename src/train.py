@@ -1,123 +1,202 @@
-"""
-train.py — Train MLP. Run from project root: python3 src/train.py
-"""
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-import argparse
-import json
+import sys, os, argparse, json
 import numpy as np
 
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+for _p in [_THIS_DIR]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 from ann.neural_network import NeuralNetwork
-from ann.optimizers import get_optimizer, NAG
-from utils.data_loader import load_dataset, get_batches
+from ann.optimizers import get_optimizer
+from utils.data_loader import load_data
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Train MLP on MNIST/Fashion-MNIST")
-    parser.add_argument("-d",   "--dataset",       type=str,   default="mnist",
-                        choices=["mnist", "fashion_mnist"])
-    parser.add_argument("-e",   "--epochs",         type=int,   default=50)
-    parser.add_argument("-b",   "--batch_size",     type=int,   default=32)
-    parser.add_argument("-l",   "--loss",           type=str,   default="cross_entropy",
-                        choices=["cross_entropy", "mse"])
-    parser.add_argument("-o",   "--optimizer",      type=str,   default="adam",
-                        choices=["sgd", "momentum", "nag", "rmsprop", "adam", "nadam"])
-    parser.add_argument("-lr",  "--learning_rate",  type=float, default=0.0001)
-    parser.add_argument("-wd",  "--weight_decay",   type=float, default=0.00005)
-    parser.add_argument("-nhl", "--num_layers",     type=int,   default=4)
-    parser.add_argument("-sz",  "--hidden_size",    type=int,   nargs="+", default=[128, 128, 128, 128])
-    parser.add_argument("-a",   "--activation",     type=str,   default="relu",
-                        choices=["sigmoid", "tanh", "relu"])
-    parser.add_argument("-w_i", "--weight_init",    type=str,   default="xavier",
-                        choices=["random", "xavier", "zeros"])
-    parser.add_argument("--wandb",                  action="store_true")
-    parser.add_argument("--wandb_project",          type=str,   default="da6401-mlp")
-    return parser.parse_args()
+# CLI
+def parse_arguments():
+    p = argparse.ArgumentParser(description='Train MLP on MNIST / Fashion-MNIST')
+
+    # ----- data & training -----
+    p.add_argument('-d',    '--dataset',       type=str,   default='mnist',
+                   help='mnist | fashion_mnist')
+    p.add_argument('-e',    '--epochs',        type=int,   default=10,
+                   help='Number of training epochs')
+    p.add_argument('-b',    '--batch_size',    type=int,   default=64,
+                   help='Mini-batch size')
+    p.add_argument('-l',    '--loss',          type=str,   default='cross_entropy',
+                   help='cross_entropy | mean_squared_error')
+    p.add_argument('-o',    '--optimizer',     type=str,   default='rmsprop',
+                   help='sgd | momentum | nag | rmsprop')
+    p.add_argument('-lr',   '--learning_rate', type=float, default=0.001,
+                   help='Initial learning rate')
+    p.add_argument('-wd',   '--weight_decay',  type=float, default=0.0,
+                   help='L2 regularisation coefficient')
+
+    # ----- architecture -----
+    p.add_argument('-nhl',  '--num_layers',    type=int,   default=3,
+                   help='Number of hidden layers')
+    p.add_argument('-sz',   '--hidden_size',   type=int,   nargs='+', default=[128,128,128],
+                   help='Neurons per hidden layer (one value or a list)')
+    p.add_argument('-a',    '--activation',    type=str,   default='relu',
+                   help='sigmoid | tanh | relu')
+    p.add_argument('-w_i',  '--weight_init',   type=str,   default='xavier',
+                   help='random | xavier')
+
+    # ----- logging -----
+    p.add_argument('-w_p',  '--wandb_project', type=str,   default=None,
+                   help='W&B project name (optional)')
+    p.add_argument('--wandb_entity',           type=str,   default=None)
+    p.add_argument('--run_name',               type=str,   default=None)
+
+    # ----- paths -----
+    p.add_argument('--model_path', type=str, default=None,
+                   help='Where to save best_model.npy (default: src/best_model.npy)')
+    p.add_argument('--config_path', type=str, default=None,
+                   help='Where to save best_config.json')
+
+    return p.parse_args()
 
 
-def train(config):
-    use_wandb = config.wandb
-    if use_wandb:
-        import wandb
-        wandb.init(project=config.wandb_project, config=vars(config))
+# ---------------------------------------------------------------------------
+# Training loop
+# ---------------------------------------------------------------------------
+def train(args,local_save=True):
+    # ---- Load data ----
+    x_train, x_val, x_test, y_train, y_val, y_test = load_data(
+        args.dataset, val_split=0.1)
 
-    # Load data
-    X_train, X_val, X_test, y_train, y_val, y_test_oh, y_test_raw = load_dataset(config.dataset)
+    # ---- Resolve hidden sizes ----
+    hs = args.hidden_size
+    if isinstance(hs, int):
+        hs = [hs]
+    hs = [int(h) for h in hs]
+    nl = args.num_layers
+    if nl and nl != len(hs):
+        hs = hs * nl if len(hs) == 1 else hs[:nl]
 
-    # Ensure hidden_size is a proper list
-    if isinstance(config.hidden_size, int):
-        config.hidden_size = [config.hidden_size] * config.num_layers
-    elif len(config.hidden_size) == 1:
-        config.hidden_size = config.hidden_size * config.num_layers
+    # ---- Build model ----
+    model = NeuralNetwork(
+        input_size=784,
+        hidden_sizes=hs,
+        output_size=10,
+        activation=args.activation,
+        weight_init=args.weight_init,
+        loss=args.loss,
+    )
+    opt = get_optimizer(args.optimizer,
+                        lr=args.learning_rate,
+                        weight_decay=args.weight_decay)
 
-    # Build model
-    model = NeuralNetwork(config)
+    # ---- Optional W&B initialisation ----
+    use_wandb = False
+    if args.wandb_project:
+        try:
+            import wandb
+            wandb.init(
+                project=args.wandb_project,
+                entity=getattr(args, 'wandb_entity', None),
+                name=getattr(args, 'run_name', None),
+                config=vars(args),
+            )
+            use_wandb = True
+        except Exception as e:
+            print(f'[W&B] Could not initialise: {e}')
 
-    # Build optimizer
-    opt_kwargs = {"lr": config.learning_rate, "weight_decay": config.weight_decay}
-    optimizer = get_optimizer(config.optimizer, **opt_kwargs)
-    is_nag = isinstance(optimizer, NAG)
+    # ---- Training ----
+    from sklearn.metrics import f1_score as skf1
 
-    # Save paths
-    script_dir   = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(script_dir)
-    models_dir   = os.path.join(project_root, "models")
-    os.makedirs(models_dir, exist_ok=True)
-    save_path    = os.path.join(script_dir, "best_model.npy")
+    best_val_f1      = -1.0
+    best_weights     = None
 
-    best_val_acc   = 0.0
-    best_val_epoch = 0
+    for epoch in range(1, args.epochs + 1):
+        # Shuffle training data each epoch
+        idx = np.random.permutation(len(x_train))
+        xtr, ytr = x_train[idx], y_train[idx]
 
-    for epoch in range(1, config.epochs + 1):
-        total_loss  = 0.0
-        num_batches = 0
+        total_loss = 0.0
+        n_batches  = 0
 
-        for X_batch, y_batch in get_batches(X_train, y_train, config.batch_size):
-            loss = model.train_step(X_batch, y_batch, optimizer,
-                                    weight_decay=config.weight_decay, is_nag=is_nag)
-            total_loss  += loss
-            num_batches += 1
+        for i in range(0, len(xtr), args.batch_size):
+            xb = xtr[i: i + args.batch_size]
+            yb = ytr[i: i + args.batch_size]
 
-        avg_loss  = total_loss / num_batches
-        train_acc = model.accuracy(X_train, y_train)
-        val_acc   = model.accuracy(X_val, y_val)
+            logits      = model.forward(xb)
+            batch_loss  = model.compute_loss(logits, yb)
+            total_loss += batch_loss
+            n_batches  += 1
 
-        val_logits = model.forward(X_val)
-        val_loss   = model.compute_loss(val_logits, y_val)
+            model.backward()                          # compute gradients
+            for layer in model.layers:
+                opt.update(layer)                     # apply parameter update
 
-        print(f"Epoch {epoch:3d}/{config.epochs} | Loss: {avg_loss:.4f} | "
-              f"Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}")
+        avg_loss = total_loss / max(n_batches, 1)
+
+        # ---- Validation metrics ----
+        val_preds  = model.predict(x_val)
+        val_acc    = float(np.mean(val_preds == y_val))
+        val_f1     = float(skf1(y_val, val_preds, average='weighted', zero_division=0))
+
+        print(f'Epoch {epoch:3d}/{args.epochs} | '
+              f'loss={avg_loss:.4f} | val_acc={val_acc:.4f} | val_f1={val_f1:.4f}')
 
         if use_wandb:
             import wandb
-            wandb.log({"epoch": epoch, "train_loss": avg_loss, "val_loss": val_loss,
-                       "train_acc": train_acc, "val_acc": val_acc})
+            wandb.log({'epoch': epoch, 'train_loss': avg_loss,
+                       'val_acc': val_acc, 'val_f1': val_f1})
 
-        if val_acc > best_val_acc:
-            best_val_acc   = val_acc
-            best_val_epoch = epoch
-            np.save(save_path, model.get_weights())
-            with open(os.path.join(script_dir, "best_config.json"), "w") as f:
-                json.dump(vars(config), f, indent=2)
+        # Save best model by validation F1
+        if val_f1 > best_val_f1:
+            best_val_f1  = val_f1
+            best_weights = model.get_weights()
 
-    print(f"\nBest val acc: {best_val_acc:.4f} at epoch {best_val_epoch}")
+    # ---- Restore best weights ----
+    model.set_weights(best_weights)
 
-    # Final test evaluation
-    weights = np.load(save_path, allow_pickle=True).item()
-    model.set_weights(weights)
-    test_acc = model.accuracy(X_test, y_test_oh)
-    print(f"Test Accuracy: {test_acc:.4f}")
+    # ---- Test evaluation ----
+    test_preds = model.predict(x_test)
+    test_acc   = float(np.mean(test_preds == y_test))
+    test_f1    = float(skf1(y_test, test_preds, average='weighted', zero_division=0))
+    print(f'\nTest acc={test_acc:.4f} | Test F1={test_f1:.4f}')
 
     if use_wandb:
         import wandb
-        wandb.log({"test_acc": test_acc, "best_val_acc": best_val_acc})
+        wandb.log({'test_acc': test_acc, 'test_f1': test_f1})
         wandb.finish()
 
+    # ---- Save model & config ----
+    src_dir = _THIS_DIR   # same directory as train.py (project root)
+
+    model_path  = args.model_path  or os.path.join(src_dir, 'best_model.npy')
+    config_path = args.config_path or os.path.join(src_dir, 'best_config.json')
+
+    os.makedirs(os.path.dirname(os.path.abspath(model_path)),  exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(config_path)), exist_ok=True)
+
+    if local_save:
+        np.save(model_path, best_weights)
+
+    cfg = {
+        'dataset':       args.dataset,
+        'hidden_sizes':  hs,
+        'hidden_size':   hs,
+        'num_layers':    len(hs),
+        'activation':    args.activation,
+        'weight_init':   args.weight_init,
+        'loss':          args.loss,
+        'optimizer':     args.optimizer,
+        'learning_rate': args.learning_rate,
+        'weight_decay':  args.weight_decay,
+        'batch_size':    args.batch_size,
+        'epochs':        args.epochs,
+        'best_val_f1':   best_val_f1,
+        'test_f1':       test_f1,
+    }
+    with open(config_path, 'w') as f:
+        json.dump(cfg, f, indent=2)
+
+    print(f'Saved model  → {model_path}')
+    print(f'Saved config → {config_path}')
     return model
 
-
-if __name__ == "__main__":
-    config = parse_args()
-    train(config)
+# ---------------------------------------------------------------------------
+if __name__ == '__main__':
+    train(parse_arguments(),False)

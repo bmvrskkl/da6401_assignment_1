@@ -1,20 +1,24 @@
 {
   "dataset": "mnist",
-  "epochs": 50,
-  "batch_size": 32,
-  "loss": "cross_entropy",
-  "optimizer": "adam",
-  "learning_rate": 0.0001,
-  "weight_decay": 5e-05,
-  "num_layers": 4,
-  "hidden_size": [
-    128,
+  "hidden_sizes": [
     128,
     128,
     128
   ],
+  "hidden_size": [
+    128,
+    128,
+    128
+  ],
+  "num_layers": 3,
   "activation": "relu",
   "weight_init": "xavier",
-  "wandb": false,
-  "wandb_project": "da6401-mlp"
+  "loss": "cross_entropy",
+  "optimizer": "rmsprop",
+  "learning_rate": 0.001,
+  "weight_decay": 0.0,
+  "batch_size": 64,
+  "epochs": 10,
+  "best_val_f1": 0.9743120167776751,
+  "test_f1": 0.9751059504206256
 }

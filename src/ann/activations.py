@@ -1,43 +1,59 @@
 """
-Activation functions and their derivatives.
+Activation functions for the MLP.
+Each class implements forward() and backward() for use in backpropagation.
 """
 import numpy as np
 
 
-def sigmoid(z):
-    z = np.clip(z, -500, 500)
-    return 1.0 / (1.0 + np.exp(-z))
+class ReLU:
+    """Rectified Linear Unit: f(x) = max(0, x)"""
+    def forward(self, x):
+        self.mask = x > 0          # cache for backward
+        return x * self.mask
 
-def sigmoid_derivative(z):
-    s = sigmoid(z)
-    return s * (1.0 - s)
+    def backward(self, grad):
+        return grad * self.mask    # gradient is 0 where x <= 0
 
-def tanh(z):
-    return np.tanh(z)
 
-def tanh_derivative(z):
-    return 1.0 - np.tanh(z) ** 2
+class Sigmoid:
+    """Sigmoid: f(x) = 1 / (1 + exp(-x))"""
+    def forward(self, x):
+        # clip to avoid overflow in exp
+        self.out = 1.0 / (1.0 + np.exp(-np.clip(x, -500, 500)))
+        return self.out
 
-def relu(z):
-    return np.maximum(0, z)
+    def backward(self, grad):
+        return grad * self.out * (1.0 - self.out)
 
-def relu_derivative(z):
-    return (z > 0).astype(float)
 
-def softmax(z):
-    z_shifted = z - np.max(z, axis=1, keepdims=True)
-    exp_z = np.exp(z_shifted)
-    return exp_z / np.sum(exp_z, axis=1, keepdims=True)
+class Tanh:
+    """Hyperbolic tangent: f(x) = tanh(x)"""
+    def forward(self, x):
+        self.out = np.tanh(x)
+        return self.out
 
-ACTIVATIONS = {
-    "sigmoid": (sigmoid, sigmoid_derivative),
-    "tanh":    (tanh,    tanh_derivative),
-    "relu":    (relu,    relu_derivative),
-}
+    def backward(self, grad):
+        return grad * (1.0 - self.out ** 2)
 
-def get_activation(name):
-    if name is None:
-        return None, None
-    if name not in ACTIVATIONS:
-        raise ValueError(f"Unknown activation '{name}'. Choose from {list(ACTIVATIONS.keys())}")
-    return ACTIVATIONS[name]
+
+class Identity:
+    """No-op activation used for the output layer (returns logits)."""
+    def forward(self, x):
+        return x
+
+    def backward(self, grad):
+        return grad
+
+
+def get_activation(name: str):
+    """Factory: return an activation instance by name."""
+    mapping = {
+        'relu':    ReLU,
+        'sigmoid': Sigmoid,
+        'tanh':    Tanh,
+        'none':    Identity,
+    }
+    key = name.lower()
+    if key not in mapping:
+        raise ValueError(f"Unknown activation '{name}'. Choose from: {list(mapping)}")
+    return mapping[key]()

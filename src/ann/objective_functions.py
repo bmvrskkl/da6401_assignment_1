@@ -1,60 +1,72 @@
 """
-Loss functions and their gradients w.r.t. output logits.
+Objective (loss) functions.
+Both losses work on raw logits; softmax is applied internally.
+The backward() method returns dL/d(logits) ready to be passed into the last layer.
 """
 import numpy as np
-from ann.activations import softmax
 
 
-def to_onehot(y, num_classes=10):
-    """Handles scalar, 0-D, 1-D integer labels, or already one-hot (N,10)."""
-    y = np.atleast_2d(np.atleast_1d(np.array(y, dtype=float)))
-    # If shape is (N,1) or (1,N) and not (N,10), treat as integer labels
-    if y.shape[1] != num_classes:
-        labels = y.flatten().astype(int)
-        one_hot = np.zeros((labels.shape[0], num_classes))
-        one_hot[np.arange(labels.shape[0]), labels] = 1.0
-        return one_hot
-    return y
+def softmax(x: np.ndarray) -> np.ndarray:
+    """Numerically stable softmax."""
+    x = x - x.max(axis=1, keepdims=True)
+    e = np.exp(x)
+    return e / e.sum(axis=1, keepdims=True)
 
 
-def cross_entropy_loss(y_pred_logits, y_true):
-    y_true = to_onehot(y_true)
-    probs  = softmax(y_pred_logits)
-    probs  = np.clip(probs, 1e-12, 1.0)
-    N      = y_true.shape[0]
-    return -np.sum(y_true * np.log(probs)) / N
+class CrossEntropyLoss:
+    """
+    Cross-entropy loss combined with softmax.
+    L = -mean( log( softmax(logits)[true_class] ) )
+    """
+    def forward(self, logits: np.ndarray, y_true: np.ndarray) -> float:
+        self.probs      = softmax(logits)
+        self.y_true     = np.array(y_true, dtype=int)
+        self.batch_size = logits.shape[0]
+        eps = 1e-12
+        chosen = self.probs[np.arange(self.batch_size), self.y_true]
+        return float(-np.log(chosen + eps).mean())
+
+    def backward(self) -> np.ndarray:
+        """dL/d(logits) = (softmax - one_hot) / batch_size"""
+        grad = self.probs.copy()
+        grad[np.arange(self.batch_size), self.y_true] -= 1.0
+        return grad / self.batch_size
 
 
-def cross_entropy_grad(y_pred_logits, y_true):
-    y_true = to_onehot(y_true)
-    probs  = softmax(y_pred_logits)
-    N      = y_true.shape[0]
-    return (probs - y_true) / N
+class MSELoss:
+    """
+    Mean-squared error between softmax probabilities and one-hot targets.
+    L = mean( (softmax(logits) - one_hot)^2 )
+    Gradient flows through the softmax Jacobian.
+    """
+    def forward(self, logits: np.ndarray, y_true: np.ndarray) -> float:
+        self.probs      = softmax(logits)
+        self.y_true     = np.array(y_true, dtype=int)
+        self.batch_size = logits.shape[0]
+        one_hot         = np.eye(logits.shape[1])[self.y_true]   # (batch, C)
+        self.diff       = self.probs - one_hot                    # (batch, C)
+        return float((self.diff ** 2).mean())
+
+    def backward(self) -> np.ndarray:
+        """
+        d(MSE)/d(logits) via chain rule through softmax.
+        dL/d(logits_i) = sum_j [ dL/d(prob_j) * d(prob_j)/d(logit_i) ]
+        where d(prob_j)/d(logit_i) = prob_i*(delta_ij - prob_j).
+        """
+        # dL/d(prob) = 2 * diff / (batch * C)
+        dA = 2.0 * self.diff / (self.batch_size * self.diff.shape[1])
+        # multiply by softmax Jacobian: p*(dA - sum(dA*p))
+        return self.probs * (dA - (dA * self.probs).sum(axis=1, keepdims=True))
 
 
-def mse_loss(y_pred_logits, y_true):
-    y_true = to_onehot(y_true)
-    probs  = softmax(y_pred_logits)
-    N      = y_true.shape[0]
-    return np.sum((probs - y_true) ** 2) / (2 * N)
-
-
-def mse_grad(y_pred_logits, y_true):
-    y_true = to_onehot(y_true)
-    probs  = softmax(y_pred_logits)
-    N      = y_true.shape[0]
-    dl_dp  = (probs - y_true) / N
-    dot    = np.sum(dl_dp * probs, axis=1, keepdims=True)
-    return probs * (dl_dp - dot)
-
-
-LOSSES = {
-    "cross_entropy": (cross_entropy_loss, cross_entropy_grad),
-    "mse":           (mse_loss,           mse_grad),
-}
-
-
-def get_loss(name):
-    if name not in LOSSES:
-        raise ValueError(f"Unknown loss '{name}'. Choose from {list(LOSSES.keys())}")
-    return LOSSES[name]
+def get_loss(name: str):
+    """Factory: return a loss instance by name."""
+    mapping = {
+        'cross_entropy':      CrossEntropyLoss,
+        'mean_squared_error': MSELoss,
+        'mse':                MSELoss,
+    }
+    key = name.lower()
+    if key not in mapping:
+        raise ValueError(f"Unknown loss '{name}'. Choose from: {list(mapping)}")
+    return mapping[key]()
