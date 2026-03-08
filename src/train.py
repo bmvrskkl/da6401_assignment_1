@@ -82,10 +82,9 @@ def train(config):
 
         avg_loss  = total_loss / num_batches
         train_acc = model.accuracy(X_train, y_train)
-        val_acc   = model.accuracy(X_val, y_val)
-        _, val_logits = model.forward(X_val)
         val_loss  = model.compute_loss(val_logits, y_val)
-
+        val_logits = model.forward(X_val)
+        val_loss   = model.compute_loss(val_logits, y_val)
         print(f"Epoch {epoch:3d}/{config.epochs} | Loss: {avg_loss:.4f} | "
               f"Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}")
 

@@ -4,13 +4,12 @@ Inference Script — Load saved model and evaluate on test set.
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 import argparse
 import json
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-
 from ann.neural_network import NeuralNetwork
+from ann.activations import softmax
 from utils.data_loader import load_dataset
 
 
@@ -31,8 +30,9 @@ def load_model(model_path, config):
 
 
 def evaluate_model(model, X_test, y_test_raw):
-    probs, logits = model.forward(X_test)
-    y_pred        = np.argmax(probs, axis=1)
+    logits = model.forward(X_test)
+    probs  = softmax(logits)
+    y_pred = np.argmax(probs, axis=1)
 
     acc       = accuracy_score(y_test_raw, y_pred)
     precision = precision_score(y_test_raw, y_pred, average="weighted", zero_division=0)
@@ -50,13 +50,11 @@ def evaluate_model(model, X_test, y_test_raw):
 
 def main():
     args = parse_arguments()
-
     with open(args.config, "r") as f:
         cfg_dict = json.load(f)
     config = argparse.Namespace(**cfg_dict)
 
     _, _, X_test, _, _, _, y_test_raw = load_dataset(args.dataset)
-
     model   = load_model(args.model, config)
     results = evaluate_model(model, X_test, y_test_raw)
 
@@ -68,7 +66,6 @@ def main():
     print(f"  Recall    : {results['recall']:.4f}")
     print(f"  F1-Score  : {results['f1']:.4f}")
     print("=" * 50)
-
     return results
 
 

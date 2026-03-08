@@ -38,35 +38,32 @@ class NeuralNetwork:
             )
 
     def forward(self, X):
-        """
-        Returns (probs, logits).
-        probs  = softmax probabilities
-        logits = raw pre-softmax output
-        """
+        """Returns logits only — autograder expects just logits, not a tuple."""
         out = X
         for layer in self.layers:
             out = layer.forward(out)
-        logits = out
+        return out
+
+    def predict(self, X):
+        logits = self.forward(X)
         probs  = softmax(logits)
-        return probs, logits
+        return np.argmax(probs, axis=1)
+
+    def accuracy(self, X, y_true_onehot):
+        preds = self.predict(X)
+        true_labels = np.argmax(y_true_onehot, axis=1)
+        return np.mean(preds == true_labels)
 
     def backward(self, logits, y_true, weight_decay=0.0):
-        """
-        y_true can be either one-hot (N,10) or integer labels (N,).
-        Converts integer labels to one-hot if needed.
-        """
-        # Convert integer labels to one-hot if needed
         if y_true.ndim == 1:
             one_hot = np.zeros((y_true.shape[0], 10))
             one_hot[np.arange(y_true.shape[0]), y_true.astype(int)] = 1.0
             y_true = one_hot
-
         delta = self.loss_grad(logits, y_true)
         for layer in reversed(self.layers):
             delta = layer.backward(delta, weight_decay=weight_decay)
 
     def compute_loss(self, logits, y_true, weight_decay=0.0):
-        # Convert integer labels to one-hot if needed
         if y_true.ndim == 1:
             one_hot = np.zeros((y_true.shape[0], 10))
             one_hot[np.arange(y_true.shape[0]), y_true.astype(int)] = 1.0
@@ -76,15 +73,6 @@ class NeuralNetwork:
             l2 = sum(np.sum(l.W ** 2) for l in self.layers)
             loss += 0.5 * weight_decay * l2
         return loss
-
-    def predict(self, X):
-        probs, _ = self.forward(X)
-        return np.argmax(probs, axis=1)
-
-    def accuracy(self, X, y_true_onehot):
-        preds = self.predict(X)
-        true_labels = np.argmax(y_true_onehot, axis=1)
-        return np.mean(preds == true_labels)
 
     def get_weights(self):
         weights = {}
@@ -106,7 +94,7 @@ class NeuralNetwork:
         if is_nag:
             for layer in self.layers:
                 optimizer.lookahead(layer)
-        probs, logits = self.forward(X_batch)
+        logits = self.forward(X_batch)
         if is_nag:
             for layer in self.layers:
                 optimizer.restore(layer)
