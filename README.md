@@ -4,8 +4,7 @@ Implementation of a Multi-Layer Perceptron (MLP) from scratch using NumPy only, 
 
 ## Links
 - **GitHub**: https://github.com/bmvrskkl/da6401_assignment_1
-- **W&B Report**: https://wandb.ai/bskkl04-indian-institute-of-technology-madras/da6401_assignment1/reports/DA6401-Assignment-1-MLP-for-Image-Classification--VmlldzoxNjEzMTI5OA
-
+- **W&B Report**: https://wandb.ai/bskkl04-indian-institute-of-technology-madras/da6401_assignment1/reports/DA6401-Assignment-1-MLP-for-Image-Classification--VmlldzoxNjEzMTI5OA?accessToken=klfy3eglgex5fgvmm8ar3ojbua3xwrymvgjsgx9n06dotwnpohjswzhg8ko5rwge
 ## Project Structure
 ```
 da6401_assignment_1/
