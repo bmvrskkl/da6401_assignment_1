@@ -15,6 +15,6 @@
   ],
   "activation": "relu",
   "weight_init": "xavier",
-  "wandb": true,
+  "wandb": false,
   "wandb_project": "da6401-mlp"
 }

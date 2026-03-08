@@ -68,16 +68,22 @@ class NeuralNetwork:
         return np.mean(preds == true_labels)
 
     def get_weights(self):
+        """Returns weights as W0, b0, W1, b1 format for autograder."""
         weights = {}
         for i, layer in enumerate(self.layers):
-            weights[f"layer_{i}"] = {"W": layer.W.copy(), "b": layer.b.copy()}
+            weights[f"W{i}"] = layer.W.copy()
+            weights[f"b{i}"] = layer.b.copy()
         return weights
 
     def set_weights(self, weights):
+        """Supports both W0/b0 and layer_0 formats."""
         for i, layer in enumerate(self.layers):
-            key = f"layer_{i}"
-            layer.W = weights[key]["W"]
-            layer.b = weights[key]["b"]
+            if f"W{i}" in weights:
+                layer.W = weights[f"W{i}"]
+                layer.b = weights[f"b{i}"]
+            elif f"layer_{i}" in weights:
+                layer.W = weights[f"layer_{i}"]["W"]
+                layer.b = weights[f"layer_{i}"]["b"]
 
     def train_step(self, X_batch, y_batch, optimizer, weight_decay=0.0, is_nag=False):
         if is_nag:

@@ -1,1 +1,1 @@
-# ANN Module - Neural Network Implementation
+# ann package
