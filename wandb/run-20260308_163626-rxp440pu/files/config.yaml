@@ -1,0 +1,109 @@
+_wandb:
+    value:
+        cli_version: 0.25.0
+        e:
+            b97b59q5ngtckxvb6g3reysjst7z60zk:
+                apple:
+                    ecpuCores: 4
+                    gpuCores: 8
+                    memoryGb: 16
+                    name: Apple M1
+                    pcpuCores: 4
+                    ramTotalBytes: "17179869184"
+                args:
+                    - -d
+                    - mnist
+                    - -e
+                    - "50"
+                    - -b
+                    - "32"
+                    - -o
+                    - adam
+                    - -lr
+                    - "0.0001"
+                    - -nhl
+                    - "4"
+                    - -sz
+                    - "128"
+                    - "128"
+                    - "128"
+                    - "128"
+                    - -a
+                    - relu
+                    - -w_i
+                    - xavier
+                    - -wd
+                    - "0.00005"
+                    - --wandb
+                    - --wandb_project
+                    - da6401-mlp
+                codePath: src/train.py
+                codePathLocal: src/train.py
+                cpu_count: 8
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "245107195904"
+                        used: "172618100736"
+                email: bskkl04@gmail.com
+                executable: /Users/balajisrinivasan/da6401_assignment_1/.venv/bin/python3
+                git:
+                    commit: 671b6914588cc2eaaa0e82e93c7f132e34a2b5a6
+                    remote: https://github.com/MiRL-IITM/da6401_assignment_1
+                host: Balajis-MacBook-Pro.local
+                memory:
+                    total: "17179869184"
+                os: macOS-26.3-arm64-arm-64bit
+                program: /Users/balajisrinivasan/da6401_assignment_1/src/train.py
+                python: CPython 3.12.13
+                root: /Users/balajisrinivasan/da6401_assignment_1
+                startedAt: "2026-03-08T11:06:26.622721Z"
+                writerId: b97b59q5ngtckxvb6g3reysjst7z60zk
+        m: []
+        python_version: 3.12.13
+        t:
+            "1":
+                - 5
+                - 53
+            "2":
+                - 2
+                - 3
+                - 5
+                - 53
+            "3":
+                - 2
+                - 16
+            "4": 3.12.13
+            "5": 0.25.0
+            "12": 0.25.0
+            "13": darwin-arm64
+activation:
+    value: relu
+batch_size:
+    value: 32
+dataset:
+    value: mnist
+epochs:
+    value: 50
+hidden_size:
+    value:
+        - 128
+        - 128
+        - 128
+        - 128
+learning_rate:
+    value: 0.0001
+loss:
+    value: cross_entropy
+num_layers:
+    value: 4
+optimizer:
+    value: adam
+wandb:
+    value: true
+wandb_project:
+    value: da6401-mlp
+weight_decay:
+    value: 5e-05
+weight_init:
+    value: xavier

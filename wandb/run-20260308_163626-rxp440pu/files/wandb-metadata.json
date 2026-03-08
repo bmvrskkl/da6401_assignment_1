@@ -1,0 +1,64 @@
+{
+  "os": "macOS-26.3-arm64-arm-64bit",
+  "python": "CPython 3.12.13",
+  "startedAt": "2026-03-08T11:06:26.622721Z",
+  "args": [
+    "-d",
+    "mnist",
+    "-e",
+    "50",
+    "-b",
+    "32",
+    "-o",
+    "adam",
+    "-lr",
+    "0.0001",
+    "-nhl",
+    "4",
+    "-sz",
+    "128",
+    "128",
+    "128",
+    "128",
+    "-a",
+    "relu",
+    "-w_i",
+    "xavier",
+    "-wd",
+    "0.00005",
+    "--wandb",
+    "--wandb_project",
+    "da6401-mlp"
+  ],
+  "program": "/Users/balajisrinivasan/da6401_assignment_1/src/train.py",
+  "codePath": "src/train.py",
+  "codePathLocal": "src/train.py",
+  "git": {
+    "remote": "https://github.com/MiRL-IITM/da6401_assignment_1",
+    "commit": "671b6914588cc2eaaa0e82e93c7f132e34a2b5a6"
+  },
+  "email": "bskkl04@gmail.com",
+  "root": "/Users/balajisrinivasan/da6401_assignment_1",
+  "host": "Balajis-MacBook-Pro.local",
+  "executable": "/Users/balajisrinivasan/da6401_assignment_1/.venv/bin/python3",
+  "cpu_count": 8,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "245107195904",
+      "used": "172618100736"
+    }
+  },
+  "memory": {
+    "total": "17179869184"
+  },
+  "apple": {
+    "name": "Apple M1",
+    "ecpuCores": 4,
+    "pcpuCores": 4,
+    "gpuCores": 8,
+    "memoryGb": 16,
+    "ramTotalBytes": "17179869184"
+  },
+  "writerId": "b97b59q5ngtckxvb6g3reysjst7z60zk"
+}

@@ -1,71 +1,94 @@
 """
-Main Neural Network Model class
-Handles forward and backward propagation loops
+NeuralNetwork class — matches exact autograder interface.
 """
 import numpy as np
+from ann.neural_layer import NeuralLayer
+from ann.activations import softmax
+from ann.objective_functions import get_loss
+from ann.optimizers import get_optimizer, NAG
+
 
 class NeuralNetwork:
-    """
-    Main model class that orchestrates the neural network training and inference.
-    """
+    def __init__(self, config):
+        self.config = config
 
-    def __init__(self, cli_args):
-        pass
+        input_size   = 784
+        output_size  = 10
+        hidden_sizes = config.hidden_size if isinstance(config.hidden_size, list) \
+                       else [config.hidden_size] * config.num_layers
+        activation   = config.activation
+        weight_init  = config.weight_init
+        loss         = config.loss
+
+        self.loss_fn, self.loss_grad = get_loss(loss)
+
+        self.layers = []
+        layer_sizes = [input_size] + hidden_sizes + [output_size]
+
+        for i in range(len(layer_sizes) - 1):
+            is_output = (i == len(layer_sizes) - 2)
+            act = None if is_output else activation
+            self.layers.append(
+                NeuralLayer(
+                    input_size=layer_sizes[i],
+                    output_size=layer_sizes[i + 1],
+                    activation=act,
+                    weight_init=weight_init,
+                )
+            )
 
     def forward(self, X):
-        """
-        Forward propagation through all layers.
-        Returns logits (no softmax applied)
-        X is shape (b, D_in) and output is shape (b, D_out).
-        b is batch size, D_in is input dimension, D_out is output dimension.
-        """
-        pass
+        """Returns (probs, logits) — autograder expects tuple."""
+        out = X
+        for layer in self.layers:
+            out = layer.forward(out)
+        logits = out
+        probs  = softmax(logits)
+        return probs, logits
 
-    def backward(self, y_true, y_pred):
-        """
-        Backward propagation to compute gradients.
-        Returns two numpy arrays: grad_Ws, grad_bs.
-        - `grad_Ws[0]` is gradient for the last (output) layer weights,
-          `grad_bs[0]` is gradient for the last layer biases, and so on.
-        """
-        grad_W_list = []
-        grad_b_list = []
+    def backward(self, logits, y_true, weight_decay=0.0):
+        delta = self.loss_grad(logits, y_true)
+        for layer in reversed(self.layers):
+            delta = layer.backward(delta, weight_decay=weight_decay)
 
-        # Backprop through layers in reverse; collect grads so that index 0 = last layer
+    def compute_loss(self, logits, y_true, weight_decay=0.0):
+        loss = self.loss_fn(logits, y_true)
+        if weight_decay > 0:
+            l2 = sum(np.sum(l.W ** 2) for l in self.layers)
+            loss += 0.5 * weight_decay * l2
+        return loss
 
-        # create explicit object arrays to avoid numpy trying to broadcast shapes
-        self.grad_W = np.empty(len(grad_W_list), dtype=object)
-        self.grad_b = np.empty(len(grad_b_list), dtype=object)
-        for i, (gw, gb) in enumerate(zip(grad_W_list, grad_b_list)):
-            self.grad_W[i] = gw
-            self.grad_b[i] = gb
+    def predict(self, X):
+        probs, _ = self.forward(X)
+        return np.argmax(probs, axis=1)
 
-        print("Shape of grad_Ws:", self.grad_W.shape, self.grad_W[1].shape)
-        print("Shape of grad_bs:", self.grad_b.shape, self.grad_b[1].shape)
-        return self.grad_W, self.grad_b
-
-    def update_weights(self):
-        pass
-
-    def train(self, X_train, y_train, epochs=1, batch_size=32):
-        pass
-
-    def evaluate(self, X, y):
-        pass
+    def accuracy(self, X, y_true_onehot):
+        preds = self.predict(X)
+        true_labels = np.argmax(y_true_onehot, axis=1)
+        return np.mean(preds == true_labels)
 
     def get_weights(self):
-        d = {}
+        weights = {}
         for i, layer in enumerate(self.layers):
-            d[f"W{i}"] = layer.W.copy()
-            d[f"b{i}"] = layer.b.copy()
-        return d
+            weights[f"layer_{i}"] = {"W": layer.W.copy(), "b": layer.b.copy()}
+        return weights
 
-    def set_weights(self, weight_dict):
+    def set_weights(self, weights):
         for i, layer in enumerate(self.layers):
-            w_key = f"W{i}"
-            b_key = f"b{i}"
-            if w_key in weight_dict:
-                layer.W = weight_dict[w_key].copy()
-            if b_key in weight_dict:
-                layer.b = weight_dict[b_key].copy()
+            key = f"layer_{i}"
+            layer.W = weights[key]["W"]
+            layer.b = weights[key]["b"]
 
+    def train_step(self, X_batch, y_batch, optimizer, weight_decay=0.0, is_nag=False):
+        if is_nag:
+            for layer in self.layers:
+                optimizer.lookahead(layer)
+        probs, logits = self.forward(X_batch)
+        if is_nag:
+            for layer in self.layers:
+                optimizer.restore(layer)
+        loss = self.compute_loss(logits, y_batch, weight_decay)
+        self.backward(logits, y_batch, weight_decay)
+        for layer in self.layers:
+            optimizer.update(layer)
+        return loss
