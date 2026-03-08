@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import argparse
 import json
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from ann.neural_network import NeuralNetwork
 from ann.activations import softmax
 from utils.data_loader import load_dataset
@@ -15,10 +15,21 @@ from utils.data_loader import load_dataset
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model",   type=str, default="src/best_model.npy")
-    parser.add_argument("--config",  type=str, default="src/best_config.json")
-    parser.add_argument("--dataset", type=str, default="mnist",
+    parser.add_argument("--model",         type=str,   default="src/best_model.npy")
+    parser.add_argument("--config",        type=str,   default="src/best_config.json")
+    parser.add_argument("--dataset",       type=str,   default="mnist",
                         choices=["mnist", "fashion_mnist"])
+    # Model architecture args — needed if autograder passes Namespace to NeuralNetwork
+    parser.add_argument("--num_layers",    type=int,   default=4)
+    parser.add_argument("--hidden_size",   type=int,   nargs="+", default=[128, 128, 128, 128])
+    parser.add_argument("--activation",    type=str,   default="relu")
+    parser.add_argument("--weight_init",   type=str,   default="xavier")
+    parser.add_argument("--loss",          type=str,   default="cross_entropy")
+    parser.add_argument("--optimizer",     type=str,   default="adam")
+    parser.add_argument("--learning_rate", type=float, default=0.0001)
+    parser.add_argument("--weight_decay",  type=float, default=0.00005)
+    parser.add_argument("--batch_size",    type=int,   default=32)
+    parser.add_argument("--epochs",        type=int,   default=50)
     return parser.parse_args()
 
 
@@ -50,12 +61,17 @@ def evaluate_model(model, X_test, y_test_raw):
 
 def main():
     args = parse_arguments()
-    with open(args.config, "r") as f:
-        cfg_dict = json.load(f)
-    config = argparse.Namespace(**cfg_dict)
+
+    # Load config from json and merge with args
+    if os.path.exists(args.config):
+        with open(args.config, "r") as f:
+            cfg_dict = json.load(f)
+        # Update args with config file values
+        for k, v in cfg_dict.items():
+            setattr(args, k, v)
 
     _, _, X_test, _, _, _, y_test_raw = load_dataset(args.dataset)
-    model   = load_model(args.model, config)
+    model   = load_model(args.model, args)
     results = evaluate_model(model, X_test, y_test_raw)
 
     print("\n" + "=" * 50)
